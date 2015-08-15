@@ -46,14 +46,14 @@ function run(server, user, password, database, query) {
     var request = connection.request();
 
     request.query(query, function(error, recordset) {
+      connection.close();
+
       if (error) {
         console.error(error);
         return;
       }
 
       console.log(JSON.stringify(recordset));
-
-      connection.close();
     });
   });
 }
