@@ -45,7 +45,7 @@ function run(server, user, password, database, query) {
 
     var request = connection.request();
 
-    request.query(query, function(error, recordset) {
+    request.query(query, function(error, recordset, message) {
       connection.close();
 
       if (error) {
@@ -53,7 +53,8 @@ function run(server, user, password, database, query) {
         return;
       }
 
-      console.log(JSON.stringify(recordset));
+      if (recordset)
+        console.log(JSON.stringify(recordset));
     });
   });
 }
