@@ -1,6 +1,6 @@
 {
   "name": "sqlcmdjs",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "sqlcmd for Mac and Linux.",
   "main": "sqlcmd.js",
   "dependencies": {

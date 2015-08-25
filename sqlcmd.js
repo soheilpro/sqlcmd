@@ -40,6 +40,7 @@ function run(server, user, password, database, query) {
   var connection = new sql.Connection(config, function(error) {
     if (error) {
       console.error(error);
+      process.exit(1);
       return;
     }
 
@@ -50,6 +51,7 @@ function run(server, user, password, database, query) {
 
       if (error) {
         console.error(error);
+        process.exit(2);
         return;
       }
 
