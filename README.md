@@ -10,26 +10,28 @@ npm install -g sqlcmdjs
 ## Usage
 
 ```
-sqlcmd -s <server> -u <username> -p <password> [-d <database>] <query>
+sqlcmd -s <server> -u <username> -p <password> [-d <database>] <script>
 ```
 
-If no query is specified, sqlcmd reads from the standard input.
+If no script is specified, sqlcmd reads from the standard input.
 
 ## Example
 
-Run a query:
+Run a script:
 
 ```
 sqlcmd -s 127.0.0.1 -u sa -p p@ssw0rd "select name, database_id from sys.databases"
 ```
 
-Run a query from file:
+Run a script from file:
 
 ```
-cat query.sql | sqlcmd -s 127.0.0.1 -u sa -p p@ssw0rd
+cat script.sql | sqlcmd -s 127.0.0.1 -u sa -p p@ssw0rd
 ```
 
 ## Version History
++ **1.1**
+  + Added support for scripts with GO statements.
 + **1.0**
 	+ Initial release.
 

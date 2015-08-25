@@ -2,6 +2,7 @@
 
 var eol = require('os').EOL;
 var sql = require('mssql');
+var async = require('async');
 
 var argv = require('optimist')
     .demand(['s', 'u', 'p'])
@@ -10,25 +11,25 @@ var argv = require('optimist')
     .alias('p', 'password')
     .alias('d', 'database')
     .usage('Usage:' + eol +
-           '  sqlcmd -s <server> -u <username> -p <password> [-d <database>] <query>')
+           '  sqlcmd -s <server> -u <username> -p <password> [-d <database>] <script>')
     .argv;
 
 if (argv._.length === 0 || argv._[0] === '-') {
-  var query = '';
+  var script = '';
 
   process.stdin.on('data', function(chunk) {
-    query += chunk;
+    script += chunk;
   });
 
   process.stdin.on('end', function() {
-    run(argv.server, argv.user, argv.password, argv.database, query);
+    run(argv.server, argv.user, argv.password, argv.database, script);
   });
 }
 else {
   run(argv.server, argv.user, argv.password, argv.database, argv._);
 }
 
-function run(server, user, password, database, query) {
+function run(server, user, password, database, script) {
   var config = {
     server: server,
     user: user,
@@ -44,19 +45,31 @@ function run(server, user, password, database, query) {
       return;
     }
 
+    var queries = script.toString().split(/\bGO\b/);
     var request = connection.request();
 
-    request.query(query, function(error, recordset, message) {
-      connection.close();
+    async.eachSeries(
+      queries,
+      function(query, callback) {
+        request.query(query, function(error, recordset) {
+          if (error)
+            return callback(error);
 
-      if (error) {
-        console.error(error);
-        process.exit(2);
-        return;
+          if (recordset)
+            console.log(JSON.stringify(recordset));
+
+          callback();
+        });
+      },
+      function(error) {
+        connection.close();
+
+        if (error) {
+          console.error(error);
+          process.exit(2);
+          return;
+        }
       }
-
-      if (recordset)
-        console.log(JSON.stringify(recordset));
-    });
+    );
   });
 }
