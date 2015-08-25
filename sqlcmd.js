@@ -10,8 +10,9 @@ var argv = require('optimist')
     .alias('u', 'user')
     .alias('p', 'password')
     .alias('d', 'database')
+    .alias('t', 'timeout')
     .usage('Usage:' + eol +
-           '  sqlcmd -s <server> -u <username> -p <password> [-d <database>] <script>')
+           '  sqlcmd -s <server> -u <username> -p <password> [-d <database>] [-t <timeout>] <script>')
     .argv;
 
 if (argv._.length === 0 || argv._[0] === '-') {
@@ -22,20 +23,20 @@ if (argv._.length === 0 || argv._[0] === '-') {
   });
 
   process.stdin.on('end', function() {
-    run(argv.server, argv.user, argv.password, argv.database, script);
+    run(argv.server, argv.user, argv.password, argv.database, argv.timeout, script);
   });
 }
 else {
-  run(argv.server, argv.user, argv.password, argv.database, argv._);
+  run(argv.server, argv.user, argv.password, argv.database, argv.timeout, argv._);
 }
 
-function run(server, user, password, database, script) {
+function run(server, user, password, database, timeout, script) {
   var config = {
     server: server,
     user: user,
     password: password,
     database: database || 'master',
-    requestTimeout: 1000 * 60
+    requestTimeout: (timeout || 60) * 1000
   }
 
   var connection = new sql.Connection(config, function(error) {

@@ -10,7 +10,7 @@ npm install -g sqlcmdjs
 ## Usage
 
 ```
-sqlcmd -s <server> -u <username> -p <password> [-d <database>] <script>
+sqlcmd -s <server> -u <username> -p <password> [-d <database>] [-t <timeout>] <script>
 ```
 
 If no script is specified, sqlcmd reads from the standard input.
@@ -30,6 +30,8 @@ cat script.sql | sqlcmd -s 127.0.0.1 -u sa -p p@ssw0rd
 ```
 
 ## Version History
++ **1.2**
+  + Added timeout argument.
 + **1.1**
   + Added support for scripts with GO statements.
 + **1.0**
