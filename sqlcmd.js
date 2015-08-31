@@ -15,7 +15,41 @@ var argv = require('optimist')
            '  sqlcmd -s <server> -u <username> -p <password> [-d <database>] [-t <timeout>] <script>')
     .argv;
 
-if (argv._.length === 0 || argv._[0] === '-') {
+getScript(function(error, script) {
+  if (error) {
+    console.error(error);
+    process.exit(1);
+    return;
+  }
+
+  connectToServer(function(error, connection) {
+    if (error) {
+      console.error(error);
+      process.exit(2);
+      return;
+    }
+
+    executeScript(script, connection, function(error, recordsets) {
+      connection.close();
+
+      if (error) {
+        console.error(error);
+        process.exit(3);
+        return;
+      }
+
+      recordsets.forEach(function(recordset) {
+        if (recordset)
+          console.log(JSON.stringify(recordset));
+      });
+    });
+  });
+});
+
+function getScript(callback) {
+  if (argv._.length !== 0 && argv._[0] !== '-')
+    return callback(null, argv._[0]);
+
   var script = '';
 
   process.stdin.on('data', function(chunk) {
@@ -23,54 +57,35 @@ if (argv._.length === 0 || argv._[0] === '-') {
   });
 
   process.stdin.on('end', function() {
-    run(argv.server, argv.user, argv.password, argv.database, argv.timeout, script);
+    callback(null, script);
   });
 }
-else {
-  run(argv.server, argv.user, argv.password, argv.database, argv.timeout, argv._);
-}
 
-function run(server, user, password, database, timeout, script) {
+function connectToServer(callback) {
   var config = {
-    server: server,
-    user: user,
-    password: password,
-    database: database || 'master',
-    requestTimeout: (timeout || 60) * 1000
+    server: argv.server,
+    user: argv.user,
+    password: argv.password,
+    database: argv.database || 'master',
+    requestTimeout: (argv.timeout || 60) * 1000
   }
 
   var connection = new sql.Connection(config, function(error) {
-    if (error) {
-      console.error(error);
-      process.exit(1);
-      return;
-    }
+    if (error)
+      return callback(error);
 
-    var queries = script.toString().split(/\bGO\b/);
-    var request = connection.request();
-
-    async.eachSeries(
-      queries,
-      function(query, callback) {
-        request.query(query, function(error, recordset) {
-          if (error)
-            return callback(error);
-
-          if (recordset)
-            console.log(JSON.stringify(recordset));
-
-          callback();
-        });
-      },
-      function(error) {
-        connection.close();
-
-        if (error) {
-          console.error(error);
-          process.exit(2);
-          return;
-        }
-      }
-    );
+    callback(null, connection);
   });
+}
+
+function executeScript(script, connection, callback) {
+  var queries = script.split(/\bGO\b/);
+
+  async.mapSeries(
+    queries,
+    function(query, callback) {
+      connection.request().query(query, callback);
+    },
+    callback
+  );
 }
