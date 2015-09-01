@@ -3,6 +3,7 @@
 var eol = require('os').EOL;
 var sql = require('mssql');
 var async = require('async');
+var _ = require('underscore');
 
 var argv = require('optimist')
     .demand(['s', 'u', 'p'])
@@ -11,8 +12,9 @@ var argv = require('optimist')
     .alias('p', 'password')
     .alias('d', 'database')
     .alias('t', 'timeout')
+    .alias('m', 'param')
     .usage('Usage:' + eol +
-           '  sqlcmd -s <server> -u <username> -p <password> [-d <database>] [-t <timeout>] <script>')
+           '  sqlcmd -s <server> -u <username> -p <password> [-d <database>] [-t <timeout>] [-m param1=foo -m param2=bar ...] <script>')
     .argv;
 
 getScript(function(error, script) {
@@ -22,25 +24,33 @@ getScript(function(error, script) {
     return;
   }
 
-  connectToServer(function(error, connection) {
+  replaceTemplateParams(script, function(error, script) {
     if (error) {
       console.error(error);
       process.exit(2);
       return;
     }
 
-    executeScript(script, connection, function(error, recordsets) {
-      connection.close();
-
+    connectToServer(function(error, connection) {
       if (error) {
         console.error(error);
         process.exit(3);
         return;
       }
 
-      recordsets.forEach(function(recordset) {
-        if (recordset)
-          console.log(JSON.stringify(recordset));
+      executeScript(script, connection, function(error, recordsets) {
+        connection.close();
+
+        if (error) {
+          console.error(error);
+          process.exit(4);
+          return;
+        }
+
+        recordsets.forEach(function(recordset) {
+          if (recordset)
+            console.log(JSON.stringify(recordset));
+        });
       });
     });
   });
@@ -59,6 +69,28 @@ function getScript(callback) {
   process.stdin.on('end', function() {
     callback(null, script);
   });
+}
+
+function replaceTemplateParams(script, callback) {
+  var params = _.object(_.map(argv.param ? (Array.isArray(argv.param) ? argv.param : [argv.param]) : [], function(param) {
+    var match = param.match(/(.+)=(.*)/);
+
+    if (!match)
+      return [];
+
+    return [match[1], match[2]];
+  }));
+
+  var script = script.replace(/<([\w-]+),\s*(\w*),\s*(\w*)>/g, function(match, name, type, defaultValue) {
+    var value = params[name] || defaultValue;
+
+    if (!value)
+      return callback(new Error('No value for param: ' + name));
+
+    return value;
+  });
+
+  callback(null, script);
 }
 
 function connectToServer(callback) {
