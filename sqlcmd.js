@@ -96,6 +96,15 @@ function replaceTemplateParams(script, callback) {
     return value;
   });
 
+  var script = script.replace(/\$\((\w+)\)/g, function(match, name) {
+    var value = params[name];
+
+    if (!value)
+      return callback(new Error('No value for param: ' + name));
+
+    return value;
+  });
+
   callback(null, script);
 }
 
