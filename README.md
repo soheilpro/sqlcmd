@@ -32,7 +32,7 @@ cat script.sql | sqlcmd -s 127.0.0.1 -u sa -p p@ssw0rd
 Run a script and supply template parameter values:
 
 ```
-sqlcmd -s 127.0.0.1 -u sa -p p@ssw0rd "select name from sys.databases where database_id = <database_id,int,>" -m database_id=1
+sqlcmd -s 127.0.0.1 -u sa -p p@ssw0rd "select name from sys.databases where database_id = $(database_id)" -m database_id=1
 ```
 
 ## Version History
