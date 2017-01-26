@@ -100,8 +100,16 @@ function replaceTemplateParams(script, callback) {
 }
 
 function connectToServer(callback) {
+  var match = /^(.*)\\(.*)$/.exec(argv.user);
+
+  if (match) {
+    argv.domain = match[1];
+    argv.user = match[2];
+  }
+
   var config = {
     server: argv.server,
+    domain: argv.domain,
     user: argv.user,
     password: argv.password,
     database: argv.database || 'master',
