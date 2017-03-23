@@ -10,7 +10,7 @@ npm install -g sqlcmdjs
 ## Usage
 
 ```
-sqlcmd -s <server> -u [<domain>\]<username> -p <password> [-d <database>] [-t <timeout>] [-m param1=foo -m param2=bar ...] <script>
+sqlcmd -s <server> -u [<domain>\]<username> -p <password> [-d <database>] [-t <timeout>] [--no-quoted-identifier] [-m param1=foo -m param2=bar ...] <script>
 ```
 
 If no script is specified, sqlcmd reads from the standard input.

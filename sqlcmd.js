@@ -19,8 +19,9 @@ var argv = require('optimist')
     .describe('d', 'Default: master')
     .describe('t', 'Default: 60 seconds')
     .describe('m', 'Format: param1=foo')
+    .describe('no-quoted-identifier', 'Disable quoted identifiers.')
     .usage('Usage:' + eol +
-           '  sqlcmd -s <server> -u <username> -p <password> [-d <database>] [-t <timeout>] [-m param1=foo -m param2=bar ...] <script>')
+           '  sqlcmd -s <server> -u <username> -p <password> [-d <database>] [-t <timeout>] [--no-quoted-identifier] [-m param1=foo -m param2=bar ...] <script>')
     .argv;
 
 getScript(function(error, script) {
@@ -139,6 +140,9 @@ function executeScript(script, connection, callback) {
   async.mapSeries(
     queries,
     function(query, callback) {
+      if (!argv['quoted-identifier'])
+        connection.request().batch('SET QUOTED_IDENTIFIER OFF');
+
       connection.request().query(query, callback);
     },
     callback
