@@ -13,14 +13,16 @@ var argv = require('optimist')
     .alias('d', 'database')
     .alias('t', 'timeout')
     .alias('m', 'param')
+    .alias('q', 'quotedid')
     .describe('s', '')
     .describe('u', '')
     .describe('p', '')
     .describe('d', 'Default: master')
     .describe('t', 'Default: 60 seconds')
     .describe('m', 'Format: param1=foo')
+    .describe('q', 'Default: ON')
     .usage('Usage:' + eol +
-           '  sqlcmd -s <server> -u <username> -p <password> [-d <database>] [-t <timeout>] [-m param1=foo -m param2=bar ...] <script>')
+           '  sqlcmd -s <server> -u <username> -p <password> [-d <database>] [-t <timeout>] [-m param1=foo -m param2=bar ...] [-q <ON|OFF>] <script>')
     .argv;
 
 getScript(function(error, script) {
@@ -139,6 +141,8 @@ function executeScript(script, connection, callback) {
   async.mapSeries(
     queries,
     function(query, callback) {
+	if (argv.quotedid === 'OFF')
+		connection.request().batch('SET QUOTED_IDENTIFIER OFF');
       connection.request().query(query, callback);
     },
     callback
