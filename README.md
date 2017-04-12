@@ -41,8 +41,9 @@ Run a script and supply template parameter values using the sqlcmd.exe format:
 sqlcmd -s 127.0.0.1 -u sa -p p@ssw0rd "select name from sys.databases where database_id = $(database_id)" -m database_id=1
 ```
 
-
 ## Version History
++ **1.5**
+  + Added port option
 + **1.4**
   + Added support for Windows domains.
   + Added support for sqlcmd.exe style template parameters. (Thanks [gunesmes](https://github.com/gunesmes))
