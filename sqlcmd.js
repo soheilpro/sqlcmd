@@ -10,17 +10,19 @@ var argv = require('optimist')
     .alias('s', 'server')
     .alias('u', 'user')
     .alias('p', 'password')
+    .alias('o', 'port')
     .alias('d', 'database')
     .alias('t', 'timeout')
     .alias('m', 'param')
     .describe('s', '')
     .describe('u', '')
     .describe('p', '')
+    .describe('o', 'Default: 1433')
     .describe('d', 'Default: master')
     .describe('t', 'Default: 60 seconds')
     .describe('m', 'Format: param1=foo')
     .usage('Usage:' + eol +
-           '  sqlcmd -s <server> -u <username> -p <password> [-d <database>] [-t <timeout>] [-m param1=foo -m param2=bar ...] <script>')
+           '  sqlcmd -s <server> -u <username> -p <password> [-o <port>] [-d <database>] [-t <timeout>] [-m param1=foo -m param2=bar ...] <script>')
     .argv;
 
 getScript(function(error, script) {
@@ -121,6 +123,7 @@ function connectToServer(callback) {
     domain: argv.domain,
     user: argv.user,
     password: argv.password,
+    port: argv.port || 1433,
     database: argv.database || 'master',
     requestTimeout: (argv.timeout || 60) * 1000
   }
