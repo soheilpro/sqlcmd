@@ -8,6 +8,7 @@ var _ = require('underscore');
 var argv = require('optimist')
     .demand(['s', 'u', 'p'])
     .alias('s', 'server')
+    .alias('o', 'port')
     .alias('u', 'user')
     .alias('p', 'password')
     .alias('d', 'database')
@@ -16,12 +17,13 @@ var argv = require('optimist')
     .describe('s', '')
     .describe('u', '')
     .describe('p', '')
+    .describe('o', 'Default: 1433')
     .describe('d', 'Default: master')
     .describe('t', 'Default: 60 seconds')
     .describe('m', 'Format: param1=foo')
     .describe('no-quoted-identifier', 'Disable quoted identifiers.')
     .usage('Usage:' + eol +
-           '  sqlcmd -s <server> -u <username> -p <password> [-d <database>] [-t <timeout>] [--no-quoted-identifier] [-m param1=foo -m param2=bar ...] <script>')
+           '  sqlcmd -s <server> [-o <port>] -u <username> -p <password> [-d <database>] [-t <timeout>] [--no-quoted-identifier] [-m param1=foo -m param2=bar ...] <script>')
     .argv;
 
 getScript(function(error, script) {
@@ -122,6 +124,7 @@ function connectToServer(callback) {
     domain: argv.domain,
     user: argv.user,
     password: argv.password,
+    port: argv.port || 1433,
     database: argv.database || 'master',
     requestTimeout: (argv.timeout || 60) * 1000
   }
