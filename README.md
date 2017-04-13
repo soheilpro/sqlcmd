@@ -42,6 +42,9 @@ sqlcmd -s 127.0.0.1 -u sa -p p@ssw0rd "select name from sys.databases where data
 ```
 
 ## Version History
++ **1.5**
+  + Added port option. (Thanks [mbergmann](https://github.com/mbergmann))
+  + Added an option for setting quoted identifiers to off. (Thanks [lanman2000](https://github.com/lanman2000))
 + **1.4**
   + Added support for Windows domains.
   + Added support for sqlcmd.exe style template parameters. (Thanks [gunesmes](https://github.com/gunesmes))
