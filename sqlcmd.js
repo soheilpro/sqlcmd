@@ -90,8 +90,8 @@ function replaceTemplateParams(script, callback) {
     return [match[1], match[2]];
   }));
 
-  var script = script.replace(/<([\w-]+),\s*(\w*),\s*(\w*)>/g, function(match, name, type, defaultValue) {
-    var value = params[name] || defaultValue;
+  var script = script.replace(/\$\((\w*)\)/g, function(match, name) {
+    var value = params[name];
 
     if (!value)
       return callback(new Error('No value for param: ' + name));
